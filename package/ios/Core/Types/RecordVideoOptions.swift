@@ -8,7 +8,32 @@
 
 import AVFoundation
 import Foundation
+import CoreMedia
 
+enum ShutterSpeed {
+    case custom(CMTime)
+    
+    init?(fromSeconds seconds: Double) {
+        // Validate the input is a positive number
+        guard seconds > 0 else { return nil }
+        
+        // Convert seconds to CMTime in milliseconds
+        let timescale: Int32 = 1000
+        let value = Int64(seconds * Double(timescale)) 
+        self.init(time: CMTimeMake(value: value, timescale: timescale))
+    }
+    
+    init(time: CMTime) {
+        self = .custom(time)
+    }
+    
+    var shutterDuration: CMTime {
+        switch self {
+        case .custom(let time):
+            return time
+        }
+    }
+}
 struct RecordVideoOptions {
   var fileType: AVFileType = .mov
   var flash: Torch = .off
@@ -23,6 +48,7 @@ struct RecordVideoOptions {
    * or set via bitRate, in Megabits per second (Mbps)
    */
   var bitRateMultiplier: Double?
+  var shutterSpeed: ShutterSpeed?
 
   init(fromJSValue dictionary: NSDictionary, bitRateOverride: Double? = nil, bitRateMultiplier: Double? = nil) throws {
     // File Type (.mov or .mp4)
@@ -47,6 +73,12 @@ struct RecordVideoOptions {
       path = try FileUtils.getFilePath(customDirectory: customPath, fileExtension: fileExtension)
     } else {
       path = try FileUtils.getFilePath(fileExtension: fileExtension)
+    }
+    // Shutter Speed
+    if let shutterSpeedNumber = dictionary["shutterSpeed"] as? NSNumber {
+        if let speed = ShutterSpeed(fromSeconds: shutterSpeedNumber.doubleValue) {
+            shutterSpeed = speed
+        }
     }
   }
 }

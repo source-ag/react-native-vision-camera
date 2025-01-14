@@ -33,6 +33,14 @@ export interface RecordVideoOptions {
    * - `h265`: The HEVC (High-Efficient-Video-Codec) for higher efficient video recordings. Results in up to 50% smaller file-sizes.
    */
   videoCodec?: 'h264' | 'h265'
+  /**
+   * The shutter speed to use for video recording, in seconds.
+   * For example:
+   * - 1/250 = 0.004
+   * - 1/500 = 0.002
+   * - 1/1000 = 0.001
+   */
+  shutterSpeed?: number;
 }
 
 /**

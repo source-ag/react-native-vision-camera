@@ -327,14 +327,27 @@ extension CameraSession {
   /**
    Configures exposure (`exposure`) as a bias that adjusts exposureTime and ISO.
    */
-  func configureExposure(configuration: CameraConfiguration, device: AVCaptureDevice) {
-    guard let exposure = configuration.exposure else {
-      return
+  func configureExposure(configuration: CameraConfiguration, device: AVCaptureDevice) throws {
+    captureSession.beginConfiguration()
+    defer { captureSession.commitConfiguration() }
+
+    // Handle exposure bias
+    if let exposure = configuration.exposure {
+      let clamped = min(max(exposure, device.minExposureTargetBias), device.maxExposureTargetBias)
+      device.setExposureTargetBias(clamped)
     }
 
-    let clamped = min(max(exposure, device.minExposureTargetBias), device.maxExposureTargetBias)
-    device.setExposureTargetBias(clamped)
-  }
+    // Handle shutter speed
+    if let shutterSpeed = configuration.shutterSpeed {
+      guard device.isExposureModeSupported(.custom) else {
+          throw CameraError.device(.configureError)
+      }
+      
+      try device.lockForConfiguration()
+      device.activeMaxExposureDuration = shutterSpeed
+      device.unlockForConfiguration()
+    }
+}
 
   // pragma MARK: Audio
 

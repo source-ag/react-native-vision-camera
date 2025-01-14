@@ -58,6 +58,7 @@ export type NativeCameraViewProps = Omit<
   onShutter?: (event: NativeSyntheticEvent<OnShutterEvent>) => void
   onOutputOrientationChanged?: (event: NativeSyntheticEvent<OutputOrientationChangedEvent>) => void
   onPreviewOrientationChanged?: (event: NativeSyntheticEvent<PreviewOrientationChangedEvent>) => void
+  shutterSpeed?: number
 }
 
 // requireNativeComponent automatically resolves 'CameraView' to 'CameraViewManager'

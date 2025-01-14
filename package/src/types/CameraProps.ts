@@ -417,4 +417,9 @@ export interface CameraProps extends ViewProps {
    */
   codeScanner?: CodeScanner
   //#endregion
+
+  /**
+   * The shutter speed in seconds
+   */
+  shutterSpeed?: number;
 }

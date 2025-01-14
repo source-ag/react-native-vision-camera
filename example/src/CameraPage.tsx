@@ -183,7 +183,7 @@ export function CameraPage({ navigation }: Props): React.ReactElement {
 
     runAtTargetFps(10, () => {
       'worklet'
-      console.log(`${frame.timestamp}: ${frame.width}x${frame.height} ${frame.pixelFormat} Frame (${frame.orientation})`)
+      // console.log(`${frame.timestamp}: ${frame.width}x${frame.height} ${frame.pixelFormat} Frame (${frame.orientation})`)
       examplePlugin(frame)
       exampleKotlinSwiftPlugin(frame)
     })
@@ -192,6 +192,7 @@ export function CameraPage({ navigation }: Props): React.ReactElement {
   const videoHdr = format?.supportsVideoHdr && enableHdr
   const photoHdr = format?.supportsPhotoHdr && enableHdr && !videoHdr
 
+
   return (
     <View style={styles.container}>
       {device != null ? (
@@ -199,6 +200,8 @@ export function CameraPage({ navigation }: Props): React.ReactElement {
           <Reanimated.View onTouchEnd={onFocusTap} style={StyleSheet.absoluteFill}>
             <TapGestureHandler onEnded={onDoubleTap} numberOfTaps={2}>
               <ReanimatedCamera
+                shutterSpeed={1/10
+                }
                 style={StyleSheet.absoluteFill}
                 device={device}
                 isActive={isActive}

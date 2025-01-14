@@ -62,6 +62,7 @@ public final class CameraView: UIView, CameraSessionDelegate, PreviewViewDelegat
   @objc var zoom: NSNumber = 1.0 // in "factor"
   @objc var exposure: NSNumber = 0.0
   @objc var videoStabilizationMode: NSString?
+  @objc var shutterSpeed: NSNumber?
   @objc var resizeMode: NSString = "cover" {
     didSet {
       updatePreview()
@@ -269,6 +270,7 @@ public final class CameraView: UIView, CameraSessionDelegate, PreviewViewDelegat
 
       // Exposure
       config.exposure = exposure.floatValue
+        config.shutterSpeed = shutterSpeed?.timeValue
 
       // isActive
       config.isActive = isActive

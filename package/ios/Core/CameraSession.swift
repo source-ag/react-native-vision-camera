@@ -185,7 +185,7 @@ final class CameraSession: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
           }
           // 9. Configure exposure bias
           if difference.exposureChanged {
-            self.configureExposure(configuration: config, device: device)
+              try self.configureExposure(configuration: config, device: device)
           }
         }
 
