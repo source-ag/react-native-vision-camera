@@ -422,4 +422,14 @@ export interface CameraProps extends ViewProps {
    * The shutter speed in seconds
    */
   shutterSpeed?: number;
+
+  /**
+   * The exposure mode to use
+   */
+  exposureMode?: 'auto' | 'locked' | 'continuousAuto' | 'custom';
+
+  /**
+   * The focus mode to use
+   */
+  focusMode?: 'auto' | 'locked' | 'continuousAuto';
 }

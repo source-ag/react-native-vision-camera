@@ -11,7 +11,7 @@ import Foundation
 
 extension CameraSession {
   // pragma MARK: Input Device
-
+    
   /**
    Configures the Input Device (`cameraId`)
    */
@@ -173,7 +173,7 @@ extension CameraSession {
       }
     }
   }
-
+    
   // pragma MARK: Format
 
   /**
@@ -273,15 +273,21 @@ extension CameraSession {
       }
       device.automaticallyEnablesLowLightBoostWhenAvailable = configuration.enableLowLightBoost
     }
+      
+      if #available(iOS 15.0, *) {
+          print("device.minimumFocusDistance", device.minimumFocusDistance)
+      } else {
+          // Fallback on earlier versions
+      }
 
     // Configure auto-focus
-    if device.isFocusModeSupported(.continuousAutoFocus) {
+    if configuration.focusMode == .continuousAuto && device.isFocusModeSupported(.continuousAutoFocus) {
       if device.isFocusPointOfInterestSupported {
         device.focusPointOfInterest = CGPoint(x: 0.5, y: 0.5)
       }
       device.focusMode = .continuousAutoFocus
     }
-    if device.isExposureModeSupported(.continuousAutoExposure) {
+    if configuration.exposureMode == .continuousAuto && device.isExposureModeSupported(.continuousAutoExposure) {
       if device.isExposurePointOfInterestSupported {
         device.exposurePointOfInterest = CGPoint(x: 0.5, y: 0.5)
       }

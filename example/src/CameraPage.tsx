@@ -200,8 +200,7 @@ export function CameraPage({ navigation }: Props): React.ReactElement {
           <Reanimated.View onTouchEnd={onFocusTap} style={StyleSheet.absoluteFill}>
             <TapGestureHandler onEnded={onDoubleTap} numberOfTaps={2}>
               <ReanimatedCamera
-                shutterSpeed={1/10
-                }
+                shutterSpeed={1/10}
                 style={StyleSheet.absoluteFill}
                 device={device}
                 isActive={isActive}
@@ -231,6 +230,8 @@ export function CameraPage({ navigation }: Props): React.ReactElement {
                 audio={microphone.hasPermission}
                 enableLocation={location.hasPermission}
                 frameProcessor={frameProcessor}
+                focusMode='locked'
+                exposureMode='locked'
               />
             </TapGestureHandler>
           </Reanimated.View>

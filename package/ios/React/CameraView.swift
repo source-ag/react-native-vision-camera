@@ -63,6 +63,9 @@ public final class CameraView: UIView, CameraSessionDelegate, PreviewViewDelegat
   @objc var exposure: NSNumber = 0.0
   @objc var videoStabilizationMode: NSString?
   @objc var shutterSpeed: NSNumber?
+  @objc var exposureMode: NSString? = "continuousAuto"
+  @objc var focusMode: NSString? = "continuousAuto"
+
   @objc var resizeMode: NSString = "cover" {
     didSet {
       updatePreview()
@@ -270,7 +273,25 @@ public final class CameraView: UIView, CameraSessionDelegate, PreviewViewDelegat
 
       // Exposure
       config.exposure = exposure.floatValue
-        config.shutterSpeed = shutterSpeed?.timeValue
+      
+      // Shutter speed
+      config.shutterSpeed = shutterSpeed?.timeValue
+
+       // FocusMode
+      if let jsFocusMode = focusMode as? String {
+        let focusMode = try FocusMode(jsValue: jsFocusMode)
+        config.focusMode = focusMode
+      } else {
+        config.focusMode = .continuousAuto
+      }
+        
+        // ExposureMode
+       if let jsExposureMode = exposureMode as? String {
+         let exposureMode = try ExposureMode(jsValue: jsExposureMode)
+         config.exposureMode = exposureMode
+       } else {
+         config.exposureMode = .continuousAuto
+       }
 
       // isActive
       config.isActive = isActive

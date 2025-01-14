@@ -71,13 +71,13 @@ extension CameraSession {
     // Reset Focus to continuous/auto
     if device.isFocusPointOfInterestSupported {
       device.focusPointOfInterest = CGPoint(x: 0.5, y: 0.5)
-      device.focusMode = .continuousAutoFocus
+      device.focusMode = configuration?.focusMode.toAVCaptureDeviceFocusMode() ?? .continuousAutoFocus
     }
 
     // Reset Exposure to continuous/auto
     if device.isExposurePointOfInterestSupported {
       device.exposurePointOfInterest = CGPoint(x: 0.5, y: 0.5)
-      device.exposureMode = .continuousAutoExposure
+      device.exposureMode = configuration?.exposureMode.toAVCaptureDeviceExposureMode() ?? .continuousAutoExposure
     }
 
     // Disable listeners

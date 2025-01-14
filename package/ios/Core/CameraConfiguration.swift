@@ -28,6 +28,10 @@ final class CameraConfiguration {
 
   // Video Stabilization
   var videoStabilizationMode: VideoStabilizationMode = .off
+    
+  var focusMode: FocusMode = .continuousAuto
+ 
+  var exposureMode: ExposureMode = .continuousAuto
 
   // Orientation
   var outputOrientation: OutputOrientation = .device
@@ -64,6 +68,8 @@ final class CameraConfiguration {
       isMirrored = other.isMirrored
       enableLocation = other.enableLocation
       videoStabilizationMode = other.videoStabilizationMode
+      focusMode = other.focusMode
+      exposureMode = other.exposureMode
       outputOrientation = other.outputOrientation
       format = other.format
       minFps = other.minFps
