@@ -16,8 +16,8 @@ extension CameraView {
         throw CameraError.capture(.focusRequiresPreview)
       }
       let normalized = previewView.captureDevicePointConverted(fromLayerPoint: point)
-      try cameraSession.focus(point: normalized)
-      return nil
+      let focusResult = try cameraSession.focus(point: normalized)
+      return focusResult
     }
   }
 }

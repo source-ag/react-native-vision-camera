@@ -1,34 +1,23 @@
+import { useIsFocused } from '@react-navigation/core'
+import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import * as React from 'react'
-import { useRef, useState, useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { GestureResponderEvent } from 'react-native'
 import { StyleSheet, Text, View } from 'react-native'
 import type { PinchGestureHandlerGestureEvent } from 'react-native-gesture-handler'
 import { PinchGestureHandler, TapGestureHandler } from 'react-native-gesture-handler'
-import type { CameraProps, CameraRuntimeError, PhotoFile, VideoFile } from 'react-native-vision-camera'
-import {
-  runAtTargetFps,
-  useCameraDevice,
-  useCameraFormat,
-  useFrameProcessor,
-  useLocationPermission,
-  useMicrophonePermission,
-} from 'react-native-vision-camera'
-import { Camera } from 'react-native-vision-camera'
-import { CONTENT_SPACING, CONTROL_BUTTON_SIZE, MAX_ZOOM_FACTOR, SAFE_AREA_PADDING, SCREEN_HEIGHT, SCREEN_WIDTH } from './Constants'
-import Reanimated, { Extrapolate, interpolate, useAnimatedGestureHandler, useAnimatedProps, useSharedValue } from 'react-native-reanimated'
-import { useEffect } from 'react'
-import { useIsForeground } from './hooks/useIsForeground'
-import { StatusBarBlurBackground } from './views/StatusBarBlurBackground'
-import { CaptureButton } from './views/CaptureButton'
 import { PressableOpacity } from 'react-native-pressable-opacity'
-import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons'
+import Reanimated, { Extrapolate, interpolate, useAnimatedGestureHandler, useAnimatedProps, useSharedValue } from 'react-native-reanimated'
 import IonIcon from 'react-native-vector-icons/Ionicons'
-import type { Routes } from './Routes'
-import type { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { useIsFocused } from '@react-navigation/core'
+import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons'
+import type { CameraProps, CameraRuntimeError, PhotoFile, VideoFile } from 'react-native-vision-camera'
+import { Camera, useCameraDevice, useCameraFormat, useLocationPermission, useMicrophonePermission } from 'react-native-vision-camera'
+import { CONTENT_SPACING, CONTROL_BUTTON_SIZE, MAX_ZOOM_FACTOR, SAFE_AREA_PADDING, SCREEN_HEIGHT, SCREEN_WIDTH } from './Constants'
+import { useIsForeground } from './hooks/useIsForeground'
 import { usePreferredCameraDevice } from './hooks/usePreferredCameraDevice'
-import { examplePlugin } from './frame-processors/ExamplePlugin'
-import { exampleKotlinSwiftPlugin } from './frame-processors/ExampleKotlinSwiftPlugin'
+import type { Routes } from './Routes'
+import { CaptureButton } from './views/CaptureButton'
+import { StatusBarBlurBackground } from './views/StatusBarBlurBackground'
 
 const ReanimatedCamera = Reanimated.createAnimatedComponent(Camera)
 Reanimated.addWhitelistedNativeProps({
@@ -55,6 +44,8 @@ export function CameraPage({ navigation }: Props): React.ReactElement {
   const [enableHdr, setEnableHdr] = useState(false)
   const [flash, setFlash] = useState<'off' | 'on'>('off')
   const [enableNightMode, setEnableNightMode] = useState(false)
+  const [shutterSpeed, setShutterSpeed] = useState(1 / 10)
+  const [focusResult, setFocusResult] = useState<{ exposureTargetOffset: number; iso: number } | null>(null)
 
   // camera device settings
   const [preferredDevice] = usePreferredCameraDevice()
@@ -129,15 +120,16 @@ export function CameraPage({ navigation }: Props): React.ReactElement {
 
   //#region Tap Gesture
   const onFocusTap = useCallback(
-    ({ nativeEvent: event }: GestureResponderEvent) => {
+    async ({ nativeEvent: event }: GestureResponderEvent) => {
       if (!device?.supportsFocus) return
-      camera.current?.focus({
-        x: event.locationX,
-        y: event.locationY,
-      })
+      const res = await camera.current?.focus({ x: event.locationX, y: event.locationY })
+      setFocusResult(res ?? null)
     },
     [device?.supportsFocus],
   )
+
+  console.log(focusResult)
+
   const onDoubleTap = useCallback(() => {
     onFlipCameraPressed()
   }, [onFlipCameraPressed])
@@ -178,20 +170,15 @@ export function CameraPage({ navigation }: Props): React.ReactElement {
     location.requestPermission()
   }, [location])
 
-  const frameProcessor = useFrameProcessor((frame) => {
-    'worklet'
-
-    runAtTargetFps(10, () => {
-      'worklet'
-      // console.log(`${frame.timestamp}: ${frame.width}x${frame.height} ${frame.pixelFormat} Frame (${frame.orientation})`)
-      examplePlugin(frame)
-      exampleKotlinSwiftPlugin(frame)
-    })
-  }, [])
-
   const videoHdr = format?.supportsVideoHdr && enableHdr
   const photoHdr = format?.supportsPhotoHdr && enableHdr && !videoHdr
 
+  const isExposureTargetMet = useMemo(() => {
+    if (focusResult === null || format === undefined) return null
+    if (focusResult.iso >= format.maxISO && focusResult.exposureTargetOffset <= -1) return 'underexposed'
+    if (focusResult.iso <= format.minISO && focusResult.exposureTargetOffset >= 1) return 'overexposed'
+    return null
+  }, [focusResult, format])
 
   return (
     <View style={styles.container}>
@@ -200,7 +187,7 @@ export function CameraPage({ navigation }: Props): React.ReactElement {
           <Reanimated.View onTouchEnd={onFocusTap} style={StyleSheet.absoluteFill}>
             <TapGestureHandler onEnded={onDoubleTap} numberOfTaps={2}>
               <ReanimatedCamera
-                shutterSpeed={1/10}
+                shutterSpeed={shutterSpeed}
                 style={StyleSheet.absoluteFill}
                 device={device}
                 isActive={isActive}
@@ -220,6 +207,7 @@ export function CameraPage({ navigation }: Props): React.ReactElement {
                 videoHdr={videoHdr}
                 photoQualityBalance="quality"
                 lowLightBoost={device.supportsLowLightBoost && enableNightMode}
+                videoStabilizationMode="off"
                 enableZoomGesture={false}
                 animatedProps={cameraAnimatedProps}
                 exposure={0}
@@ -229,9 +217,9 @@ export function CameraPage({ navigation }: Props): React.ReactElement {
                 video={true}
                 audio={microphone.hasPermission}
                 enableLocation={location.hasPermission}
-                frameProcessor={frameProcessor}
-                focusMode='locked'
-                exposureMode='locked'
+                // frameProcessor={frameProcessor}
+                focusMode="auto"
+                exposureMode="auto"
               />
             </TapGestureHandler>
           </Reanimated.View>
@@ -260,6 +248,7 @@ export function CameraPage({ navigation }: Props): React.ReactElement {
         <PressableOpacity style={styles.button} onPress={onFlipCameraPressed} disabledOpacity={0.4}>
           <IonIcon name="camera-reverse" color="white" size={24} />
         </PressableOpacity>
+
         {supportsFlash && (
           <PressableOpacity style={styles.button} onPress={onFlashPressed} disabledOpacity={0.4}>
             <IonIcon name={flash === 'on' ? 'flash' : 'flash-off'} color="white" size={24} />
@@ -283,6 +272,11 @@ export function CameraPage({ navigation }: Props): React.ReactElement {
         <PressableOpacity style={styles.button} onPress={() => navigation.navigate('Devices')}>
           <IonIcon name="settings-outline" color="white" size={24} />
         </PressableOpacity>
+        {isExposureTargetMet !== null && (
+          <View style={{ backgroundColor: 'black' }}>
+            <Text style={{ color: 'orange' }}>{isExposureTargetMet}</Text>
+          </View>
+        )}
         <PressableOpacity style={styles.button} onPress={() => navigation.navigate('CodeScannerPage')}>
           <IonIcon name="qr-code-outline" color="white" size={24} />
         </PressableOpacity>

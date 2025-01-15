@@ -273,10 +273,13 @@ public final class CameraView: UIView, CameraSessionDelegate, PreviewViewDelegat
 
       // Exposure
       config.exposure = exposure.floatValue
-      
-      // Shutter speed
-      config.shutterSpeed = shutterSpeed?.timeValue
-
+        
+        if let shutterSpeedValue = shutterSpeed as? Double {
+            config.shutterSpeed = ShutterSpeed(fromSeconds: shutterSpeedValue)
+        } else {
+            config.shutterSpeed = nil
+        }
+        
        // FocusMode
       if let jsFocusMode = focusMode as? String {
         let focusMode = try FocusMode(jsValue: jsFocusMode)
@@ -326,6 +329,8 @@ public final class CameraView: UIView, CameraSessionDelegate, PreviewViewDelegat
   }
 
   // pragma MARK: Event Invokers
+    
+    // exposure 1.1
 
   func onError(_ error: CameraError) {
     VisionLogger.log(level: .error, message: "Invoking onError(): \(error.message)")

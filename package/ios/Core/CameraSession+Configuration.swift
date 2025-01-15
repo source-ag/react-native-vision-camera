@@ -11,7 +11,6 @@ import Foundation
 
 extension CameraSession {
   // pragma MARK: Input Device
-    
   /**
    Configures the Input Device (`cameraId`)
    */
@@ -173,7 +172,6 @@ extension CameraSession {
       }
     }
   }
-    
   // pragma MARK: Format
 
   /**
@@ -273,7 +271,6 @@ extension CameraSession {
       }
       device.automaticallyEnablesLowLightBoostWhenAvailable = configuration.enableLowLightBoost
     }
-      
       if #available(iOS 15.0, *) {
           print("device.minimumFocusDistance", device.minimumFocusDistance)
       } else {
@@ -281,17 +278,17 @@ extension CameraSession {
       }
 
     // Configure auto-focus
-    if configuration.focusMode == .continuousAuto && device.isFocusModeSupported(.continuousAutoFocus) {
+      if  device.isFocusModeSupported(configuration.focusMode.toAVCaptureDeviceFocusMode()) {
       if device.isFocusPointOfInterestSupported {
         device.focusPointOfInterest = CGPoint(x: 0.5, y: 0.5)
       }
-      device.focusMode = .continuousAutoFocus
+          device.focusMode = configuration.focusMode.toAVCaptureDeviceFocusMode()
     }
-    if configuration.exposureMode == .continuousAuto && device.isExposureModeSupported(.continuousAutoExposure) {
+      if device.isExposureModeSupported(configuration.exposureMode.toAVCaptureDeviceExposureMode()) {
       if device.isExposurePointOfInterestSupported {
         device.exposurePointOfInterest = CGPoint(x: 0.5, y: 0.5)
       }
-      device.exposureMode = .continuousAutoExposure
+          device.exposureMode = configuration.exposureMode.toAVCaptureDeviceExposureMode()
     }
   }
 
@@ -348,9 +345,8 @@ extension CameraSession {
       guard device.isExposureModeSupported(.custom) else {
           throw CameraError.device(.configureError)
       }
-      
       try device.lockForConfiguration()
-      device.activeMaxExposureDuration = shutterSpeed
+      device.activeMaxExposureDuration = shutterSpeed.shutterDuration
       device.unlockForConfiguration()
     }
 }

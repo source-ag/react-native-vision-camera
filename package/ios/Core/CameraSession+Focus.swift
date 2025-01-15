@@ -13,7 +13,7 @@ extension CameraSession {
   /**
    Focuses the Camera to the specified point. The point must be in the Camera coordinate system, so {0...1} on both axis.
    */
-  func focus(point: CGPoint) throws {
+    func focus(point: CGPoint) throws -> NSDictionary {
     guard let device = videoDeviceInput?.device else {
       throw CameraError.session(SessionError.cameraNotReady)
     }
@@ -28,9 +28,9 @@ extension CameraSession {
       defer {
         device.unlockForConfiguration()
       }
-
+        
       // Set Focus
-      if device.isFocusPointOfInterestSupported {
+        if device.isFocusPointOfInterestSupported {
         device.focusPointOfInterest = point
         device.focusMode = .autoFocus
       }
@@ -40,18 +40,31 @@ extension CameraSession {
         device.exposurePointOfInterest = point
         device.exposureMode = .autoExpose
       }
-
+        
+        
       // Remove any existing listeners
       NotificationCenter.default.removeObserver(self,
                                                 name: NSNotification.Name.AVCaptureDeviceSubjectAreaDidChange,
                                                 object: nil)
 
-      // Listen for focus completion
-      device.isSubjectAreaChangeMonitoringEnabled = true
-      NotificationCenter.default.addObserver(self,
+        let shouldRefocus = configuration?.focusMode.toAVCaptureDeviceFocusMode() == .continuousAutoFocus
+        let shouldReExpose = configuration?.exposureMode.toAVCaptureDeviceExposureMode() == .continuousAutoExposure
+        
+        if shouldRefocus || shouldReExpose {
+          // Listen for focus completion
+        device.isSubjectAreaChangeMonitoringEnabled = true
+        NotificationCenter.default.addObserver(self,
                                              selector: #selector(subjectAreaDidChange),
                                              name: NSNotification.Name.AVCaptureDeviceSubjectAreaDidChange,
                                              object: nil)
+        }
+        
+        let focusResult: NSDictionary = [
+            "exposureTargetOffset": device.exposureTargetOffset,
+            "iso": device.iso
+        ]
+        
+        return focusResult
     } catch {
       throw CameraError.device(DeviceError.configureError)
     }
@@ -67,15 +80,18 @@ extension CameraSession {
     defer {
       device.unlockForConfiguration()
     }
+      
+    let shouldRefocus = configuration?.focusMode.toAVCaptureDeviceFocusMode() == .continuousAutoFocus
+    let shouldReExpose = configuration?.exposureMode.toAVCaptureDeviceExposureMode() == .continuousAutoExposure
 
     // Reset Focus to continuous/auto
-    if device.isFocusPointOfInterestSupported {
+    if shouldRefocus && device.isFocusPointOfInterestSupported {
       device.focusPointOfInterest = CGPoint(x: 0.5, y: 0.5)
       device.focusMode = configuration?.focusMode.toAVCaptureDeviceFocusMode() ?? .continuousAutoFocus
     }
 
     // Reset Exposure to continuous/auto
-    if device.isExposurePointOfInterestSupported {
+    if shouldReExpose && device.isExposurePointOfInterestSupported {
       device.exposurePointOfInterest = CGPoint(x: 0.5, y: 0.5)
       device.exposureMode = configuration?.exposureMode.toAVCaptureDeviceExposureMode() ?? .continuousAutoExposure
     }

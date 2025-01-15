@@ -8,12 +8,12 @@ import Reanimated, {
   Easing,
   Extrapolate,
   interpolate,
-  useAnimatedStyle,
-  withSpring,
-  withTiming,
   useAnimatedGestureHandler,
+  useAnimatedStyle,
   useSharedValue,
   withRepeat,
+  withSpring,
+  withTiming,
 } from 'react-native-reanimated'
 import type { Camera, PhotoFile, VideoFile } from 'react-native-vision-camera'
 import { CAPTURE_BUTTON_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH } from './../Constants'

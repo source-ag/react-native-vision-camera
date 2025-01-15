@@ -6,43 +6,43 @@
 //
 
 #if VISION_CAMERA_ENABLE_FRAME_PROCESSORS
-import VisionCamera
+    import VisionCamera
 
-// Example for a Swift Frame Processor plugin
-@objc(ExampleSwiftFrameProcessorPlugin)
-public class ExampleSwiftFrameProcessorPlugin: FrameProcessorPlugin {
-  public override init(proxy: VisionCameraProxyHolder, options: [AnyHashable: Any]! = [:]) {
-    super.init(proxy: proxy, options: options)
+    // Example for a Swift Frame Processor plugin
+    @objc(ExampleSwiftFrameProcessorPlugin)
+    public class ExampleSwiftFrameProcessorPlugin: FrameProcessorPlugin {
+        override public init(proxy: VisionCameraProxyHolder, options: [AnyHashable: Any]! = [:]) {
+            super.init(proxy: proxy, options: options)
 
-    print("ExampleSwiftFrameProcessorPlugin initialized with options: \(String(describing: options))")
-  }
+            print("ExampleSwiftFrameProcessorPlugin initialized with options: \(String(describing: options))")
+        }
 
-  public override func callback(_ frame: Frame, withArguments arguments: [AnyHashable: Any]?) -> Any? {
-    let imageBuffer = CMSampleBufferGetImageBuffer(frame.buffer)
+        override public func callback(_ frame: Frame, withArguments arguments: [AnyHashable: Any]?) -> Any? {
+            let imageBuffer = CMSampleBufferGetImageBuffer(frame.buffer)
 
-    if let arguments, let imageBuffer {
-      let width = CVPixelBufferGetWidth(imageBuffer)
-      let height = CVPixelBufferGetHeight(imageBuffer)
-      let count = arguments.count
+            if let arguments, let imageBuffer {
+                let width = CVPixelBufferGetWidth(imageBuffer)
+                let height = CVPixelBufferGetHeight(imageBuffer)
+                let count = arguments.count
 
-      print(
-        "ExampleSwiftPlugin: \(width) x \(height) Image. Logging \(count) parameters:"
-      )
+                print(
+                    "ExampleSwiftPlugin: \(width) x \(height) Image. Logging \(count) parameters:"
+                )
 
-      for key in arguments.keys {
-        let value = arguments[key]
-        let valueString = String(describing: value)
-        let valueClassString = String(describing: value.self)
-        print("ExampleSwiftPlugin:   -> \(valueString) (\(valueClassString))")
-      }
+                for key in arguments.keys {
+                    let value = arguments[key]
+                    let valueString = String(describing: value)
+                    let valueClassString = String(describing: value.self)
+                    print("ExampleSwiftPlugin:   -> \(valueString) (\(valueClassString))")
+                }
+            }
+
+            return [
+                "example_str": "SwiftTest",
+                "example_bool": false,
+                "example_double": 6.7,
+                "example_array": ["Good bye", false, 21.37],
+            ]
+        }
     }
-
-    return [
-      "example_str": "SwiftTest",
-      "example_bool": false,
-      "example_double": 6.7,
-      "example_array": ["Good bye", false, 21.37]
-    ]
-  }
-}
 #endif

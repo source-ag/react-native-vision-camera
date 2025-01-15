@@ -53,4 +53,3 @@ enum ExposureMode: String, JSUnionValue {
       return rawValue
     }
   }
-

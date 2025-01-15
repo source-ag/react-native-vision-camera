@@ -1,20 +1,12 @@
 import React from 'react'
+import type { EmitterSubscription, NativeMethods, NativeSyntheticEvent } from 'react-native'
 import { findNodeHandle, StyleSheet } from 'react-native'
-import type { CameraDevice } from './types/CameraDevice'
-import type { CameraCaptureError } from './CameraError'
-import { CameraRuntimeError, tryParseNativeCameraError, isErrorWithCause } from './CameraError'
-import type { CameraProps, DrawableFrameProcessor, OnShutterEvent, ReadonlyFrameProcessor } from './types/CameraProps'
-import { CameraModule } from './NativeCameraModule'
-import type { PhotoFile, TakePhotoOptions } from './types/PhotoFile'
-import type { Point } from './types/Point'
-import type { RecordVideoOptions, VideoFile } from './types/VideoFile'
-import { VisionCameraProxy } from './frame-processors/VisionCameraProxy'
 import { CameraDevices } from './CameraDevices'
-import type { EmitterSubscription, NativeSyntheticEvent, NativeMethods } from 'react-native'
-import type { TakeSnapshotOptions } from './types/Snapshot'
-import { SkiaCameraCanvas } from './skia/SkiaCameraCanvas'
-import type { Frame } from './types/Frame'
+import type { CameraCaptureError } from './CameraError'
+import { CameraRuntimeError, isErrorWithCause, tryParseNativeCameraError } from './CameraError'
 import { FpsGraph, MAX_BARS } from './FpsGraph'
+import { VisionCameraProxy } from './frame-processors/VisionCameraProxy'
+import { CameraModule } from './NativeCameraModule'
 import type {
   AverageFpsChangedEvent,
   NativeCameraViewProps,
@@ -25,6 +17,14 @@ import type {
 } from './NativeCameraView'
 import { NativeCameraView } from './NativeCameraView'
 import { RotationHelper } from './RotationHelper'
+import { SkiaCameraCanvas } from './skia/SkiaCameraCanvas'
+import type { CameraDevice } from './types/CameraDevice'
+import type { CameraProps, DrawableFrameProcessor, OnShutterEvent, ReadonlyFrameProcessor } from './types/CameraProps'
+import type { Frame } from './types/Frame'
+import type { PhotoFile, TakePhotoOptions } from './types/PhotoFile'
+import type { Point } from './types/Point'
+import type { TakeSnapshotOptions } from './types/Snapshot'
+import type { RecordVideoOptions, VideoFile } from './types/VideoFile'
 
 //#region Types
 export type CameraPermissionStatus = 'granted' | 'not-determined' | 'denied' | 'restricted'
@@ -373,7 +373,7 @@ export class Camera extends React.PureComponent<CameraProps, CameraState> {
    * })
    * ```
    */
-  public async focus(point: Point): Promise<void> {
+  public async focus(point: Point): Promise<{ exposureTargetOffset: number; iso: number }> {
     try {
       return await CameraModule.focus(this.handle, point)
     } catch (e) {

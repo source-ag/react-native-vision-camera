@@ -44,7 +44,7 @@ final class CameraConfiguration {
   var maxFps: Int32?
   var enableLowLightBoost = false
   var torch: Torch = .off
-  var shutterSpeed: CMTime?
+  var shutterSpeed: ShutterSpeed?
 
   // Zoom
   var zoom: CGFloat?
