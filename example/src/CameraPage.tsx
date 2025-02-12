@@ -220,6 +220,11 @@ export function CameraPage({ navigation }: Props): React.ReactElement {
                 // frameProcessor={frameProcessor}
                 focusMode="auto"
                 exposureMode="auto"
+                whiteBalanceGains={{
+                  red: 4,
+                  green: 1,
+                  blue: 1
+                }}
               />
             </TapGestureHandler>
           </Reanimated.View>

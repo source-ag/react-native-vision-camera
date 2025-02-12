@@ -290,6 +290,11 @@ extension CameraSession {
       }
           device.exposureMode = configuration.exposureMode.toAVCaptureDeviceExposureMode()
     }
+
+    // Configure white balance
+    if configuration.whiteBalanceGains != nil {
+        try configureWhiteBalance(configuration: configuration, device: device)
+    }
   }
 
   /**
@@ -407,6 +412,39 @@ extension CameraSession {
       output.setSampleBufferDelegate(self, queue: CameraQueues.audioQueue)
       audioCaptureSession.addOutput(output)
       audioOutput = output
+    }
+  }
+
+  func configureWhiteBalance(configuration: CameraConfiguration, device: AVCaptureDevice) throws {
+    try device.lockForConfiguration()
+    defer { device.unlockForConfiguration() }
+    if let gains = configuration.whiteBalanceGains {
+      let maxGain = device.maxWhiteBalanceGain
+        VisionLogger.log(level: .info, message: "👨‍🎨 Configuring white balance - Device max gain: \(maxGain)")
+
+      
+      // First clamp the values between 1.0 and maxWhiteBalanceGain
+      // AVCaptureDevice.WhiteBalanceGains accepts values between 1.0 and maxWhiteBalanceGain
+      let redGain = min(max(1.0, gains.red), maxGain)
+      let greenGain = min(max(1.0, gains.green), maxGain)
+      let blueGain = min(max(1.0, gains.blue), maxGain)
+        VisionLogger.log(level: .info, message: "👨‍🎨 Clamped gains - red: \(redGain), green: \(greenGain), blue: \(blueGain)")
+
+      // Find the minimum gain value to normalize against
+      let minGain = min(redGain, min(greenGain, blueGain))
+      
+      // Create normalized gains
+      let normalizedGains = AVCaptureDevice.WhiteBalanceGains(
+        redGain: redGain / minGain,
+        greenGain: greenGain / minGain,
+        blueGain: blueGain / minGain
+      )
+        
+        VisionLogger.log(level: .info, message: "👨‍🎨 Normalized gains - red: \(normalizedGains.redGain), green: \(normalizedGains.greenGain), blue: \(normalizedGains.blueGain)")
+
+      
+        device.setWhiteBalanceModeLocked(with: normalizedGains) { time in
+        }
     }
   }
 }

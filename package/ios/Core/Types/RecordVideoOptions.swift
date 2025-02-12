@@ -34,6 +34,8 @@ enum ShutterSpeed {
         }
     }
 }
+
+
 struct RecordVideoOptions {
   var fileType: AVFileType = .mov
   var flash: Torch = .off
@@ -49,7 +51,6 @@ struct RecordVideoOptions {
    */
   var bitRateMultiplier: Double?
   var shutterSpeed: ShutterSpeed?
-
   init(fromJSValue dictionary: NSDictionary, bitRateOverride: Double? = nil, bitRateMultiplier: Double? = nil) throws {
     // File Type (.mov or .mp4)
     if let fileTypeOption = dictionary["fileType"] as? String {

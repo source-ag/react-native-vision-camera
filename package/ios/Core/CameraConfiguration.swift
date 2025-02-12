@@ -52,6 +52,8 @@ final class CameraConfiguration {
   // Exposure
   var exposure: Float?
 
+  var whiteBalanceGains: WhiteBalanceGains?
+
   // isActive (Start/Stop)
   var isActive = false
 
@@ -78,6 +80,7 @@ final class CameraConfiguration {
       torch = other.torch
       zoom = other.zoom
       exposure = other.exposure
+      whiteBalanceGains = other.whiteBalanceGains
       isActive = other.isActive
       audio = other.audio
     } else {
@@ -105,6 +108,7 @@ final class CameraConfiguration {
     let torchChanged: Bool
     let zoomChanged: Bool
     let exposureChanged: Bool
+    let whiteBalanceChanged: Bool
 
     let audioSessionChanged: Bool
     let locationChanged: Bool
@@ -122,7 +126,7 @@ final class CameraConfiguration {
      [`formatChanged`, `sidePropsChanged`, `zoomChanged`, `exposureChanged`]
      */
     var isDeviceConfigurationDirty: Bool {
-      return isSessionConfigurationDirty || formatChanged || sidePropsChanged || zoomChanged || exposureChanged
+      return isSessionConfigurationDirty || formatChanged || sidePropsChanged || zoomChanged || exposureChanged || whiteBalanceChanged
     }
 
     init(between left: CameraConfiguration?, and right: CameraConfiguration) {
@@ -138,7 +142,11 @@ final class CameraConfiguration {
       // format (depends on cameraId)
       formatChanged = inputChanged || left?.format != right.format
       // side-props (depends on format)
-      sidePropsChanged = formatChanged || left?.minFps != right.minFps || left?.maxFps != right.maxFps || left?.enableLowLightBoost != right.enableLowLightBoost
+      sidePropsChanged = formatChanged || 
+                         left?.minFps != right.minFps || 
+                         left?.maxFps != right.maxFps || 
+                         left?.enableLowLightBoost != right.enableLowLightBoost ||
+                         left?.whiteBalanceGains != right.whiteBalanceGains
       // torch (depends on isActive)
       let wasInactiveAndNeedsToEnableTorchAgain = left?.isActive == false && right.isActive == true && right.torch == .on
       torchChanged = inputChanged || wasInactiveAndNeedsToEnableTorchAgain || left?.torch != right.torch
@@ -146,6 +154,8 @@ final class CameraConfiguration {
       zoomChanged = formatChanged || left?.zoom != right.zoom
       // exposure (depends on device)
       exposureChanged = inputChanged || left?.exposure != right.exposure
+      
+      whiteBalanceChanged = inputChanged || left?.whiteBalanceGains != right.whiteBalanceGains
 
       // audio session
       audioSessionChanged = left?.audio != right.audio

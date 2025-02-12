@@ -65,6 +65,8 @@ public final class CameraView: UIView, CameraSessionDelegate, PreviewViewDelegat
   @objc var shutterSpeed: NSNumber?
   @objc var exposureMode: NSString? = "continuousAuto"
   @objc var focusMode: NSString? = "continuousAuto"
+  @objc var whiteBalanceGains: NSDictionary?
+
 
   @objc var resizeMode: NSString = "cover" {
     didSet {
@@ -114,6 +116,7 @@ public final class CameraView: UIView, CameraSessionDelegate, PreviewViewDelegat
 
   // CameraView+TakeSnapshot
   var latestVideoFrame: Snapshot?
+
 
   // pragma MARK: Setup
 
@@ -298,6 +301,22 @@ public final class CameraView: UIView, CameraSessionDelegate, PreviewViewDelegat
 
       // isActive
       config.isActive = isActive
+
+      // White Balance Gains
+      if let jsWhiteBalanceGains = whiteBalanceGains {
+        do {
+          let gains = try WhiteBalanceGains(jsValue: jsWhiteBalanceGains)
+          config.whiteBalanceGains = WhiteBalanceGains(
+            red: gains.red,
+            green: gains.green,
+            blue: gains.blue
+          )
+        } catch {
+          onError(.parameter(.invalid(unionName: "whiteBalanceGains", receivedValue: jsWhiteBalanceGains.description)))
+        }
+      } else {
+        config.whiteBalanceGains = nil
+      }
     }
 
     // Store `zoom` offset for native pinch-gesture

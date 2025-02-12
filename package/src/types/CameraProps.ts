@@ -431,5 +431,14 @@ export interface CameraProps extends ViewProps {
   /**
    * The focus mode to use
    */
-  focusMode?: 'auto' | 'locked' | 'continuousAuto';
+  focusMode?: 'auto' | 'locked' | 'continuousAuto'; 
+
+  /**
+   * The white balance gains to use
+   */
+  whiteBalanceGains?: {
+    red: number;
+    green: number;
+    blue: number;
+  };
 }
